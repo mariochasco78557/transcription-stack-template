@@ -1,0 +1,99 @@
+{
+ "label": "a_20min",
+ "wav": "bench/audio/a_20min.wav",
+ "audio_s": 1200.0,
+ "audio_min": 20.0,
+ "window_max_s": 900,
+ "windows": [
+  [
+   0.0,
+   899.4
+  ],
+  [
+   899.4,
+   1200.0
+  ]
+ ],
+ "n_windows": 2,
+ "speakers_requested": "auto",
+ "speakers_found": 2,
+ "asr_segments": 136,
+ "asr_words": 2324,
+ "language": "es",
+ "diar_segments": 48,
+ "turns": 24,
+ "participantes": [
+  "Speaker 1",
+  "Speaker 2"
+ ],
+ "peak_vmhwm_mb": 1857,
+ "total_wall_s": 377.6,
+ "total_rtf": 0.3147,
+ "stages": [
+  {
+   "stage": "normalize",
+   "wall_s": 0.8,
+   "rtf": 0.0007,
+   "vmhwm_before_mb": 34,
+   "vmhwm_after_mb": 34,
+   "added_to_peak_mb": 0,
+   "rss_before_mb": 34,
+   "rss_after_mb": 34
+  },
+  {
+   "stage": "asr",
+   "wall_s": 210.6,
+   "rtf": 0.1755,
+   "vmhwm_before_mb": 34,
+   "vmhwm_after_mb": 1857,
+   "added_to_peak_mb": 1823,
+   "rss_before_mb": 34,
+   "rss_after_mb": 193
+  },
+  {
+   "stage": "release",
+   "wall_s": 0.0,
+   "rtf": 0.0,
+   "vmhwm_before_mb": 1857,
+   "vmhwm_after_mb": 1857,
+   "added_to_peak_mb": 0,
+   "rss_before_mb": 193,
+   "rss_after_mb": 193
+  },
+  {
+   "stage": "diarize",
+   "wall_s": 166.2,
+   "rtf": 0.1385,
+   "vmhwm_before_mb": 1857,
+   "vmhwm_after_mb": 1857,
+   "added_to_peak_mb": 0,
+   "rss_before_mb": 193,
+   "rss_after_mb": 217
+  },
+  {
+   "stage": "merge",
+   "wall_s": 0.0,
+   "rtf": 0.0,
+   "vmhwm_before_mb": 1857,
+   "vmhwm_after_mb": 1857,
+   "added_to_peak_mb": 0,
+   "rss_before_mb": 217,
+   "rss_after_mb": 217
+  }
+ ],
+ "pid": 3938317,
+ "speech_per_speaker_s": {
+  "0": 1063.2,
+  "1": 96.5
+ },
+ "speaker_span_s": {
+  "0": [
+   0.0,
+   1198.8
+  ],
+  "1": [
+   84.8,
+   1009.6
+  ]
+ }
+}

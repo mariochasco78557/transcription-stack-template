@@ -1,0 +1,27 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Project-specific (Transcription_24_7)
+models/
+bench/audio/
+bench/cache/          # cached diarization segments + embeddings (bench/diar_sweep.py)
+data/
+*.wav
+*.m4a
+
+# Local, machine-specific configuration (copy from config.example.toml)
+config.toml
+*.npz
+*.db
+*.db-*
+.env
+.env.*
+.DS_Store

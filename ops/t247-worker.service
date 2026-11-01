@@ -1,0 +1,58 @@
+[Unit]
+Description=Transcription 24/7 worker (ASR + diarization + summary)
+# Spec: <project>/docs/ARCHITECTURE.md §11. Note the two different escaping rules below:
+# WorkingDirectory= takes the rest of the line; if your project path contains spaces, write them literally there (quoting or \x20 does not work),
+# whereas ExecStart= is parsed as an argv and needs \x20 for each space. EDIT the two paths below to match where you cloned the repo.
+
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/transcription-stack-template
+ExecStart=%h/transcription-stack-template/.venv/bin/t247 worker
+# uv is only needed for development; the unit calls the venv entry point directly so a restart
+# never touches the network (§16 D11). ffmpeg/ffprobe come from /usr/bin, claude from ~/.local/bin.
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONUNBUFFERED=1
+Environment=OMP_NUM_THREADS=4
+Environment=TZ=Europe/Madrid
+
+# Restart on failure only, with a growing delay: a crash loop must not become a busy loop on a
+# shared box. A clean exit (SIGTERM from `systemctl stop`) is not a failure and is left alone.
+Restart=on-failure
+RestartSec=10
+RestartSteps=5
+RestartMaxDelaySec=300
+
+# The worker is the heavy process on a 16 GB box shared with VS Code and Claude Code sessions:
+# lowest scheduling priority everywhere, 4 of 8 vCPUs, and a hard 3 GB ceiling with no swap so a
+# runaway stage is killed instead of thrashing (§11).
+#
+# Measured peak RSS (bench/RESULTS.md "Long audio", D18): 1857 MB at 20 min of audio, 1903 MB at
+# 60 min, 1909 MB at 120 min — i.e. FLAT in the recording's duration, because both heavy stages
+# process it in windows of at most pipeline.window_max_s (900 s). Before windowing this scaled with
+# duration (2459 MB at 30 min, OOM-killed at 40 and 60 min), which is what MemoryHigh below was
+# silently assuming away. Headroom against MemoryHigh=2500M is therefore ~590 MB at ANY length, not
+# just on short clips. Raising pipeline.window_max_s raises the peak roughly linearly; lowering it
+# is the knob to reach for if this budget ever has to shrink.
+Nice=19
+CPUSchedulingPolicy=idle
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+OOMScoreAdjust=500
+CPUQuota=400%
+MemoryHigh=2500M
+MemoryMax=3G
+MemorySwapMax=0
+
+# Graceful stop: the worker finishes the stage in flight, checkpoints its artifact and releases
+# the lease. Past this, SIGKILL costs at most the current stage — the finished ones are on disk.
+KillSignal=SIGTERM
+TimeoutStopSec=120
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=t247-worker
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,138 @@
+# Transcription 24/7 — non-secret configuration (ARCHITECTURE.md §5).
+# TEMPLATE: copy to config.toml (gitignored) and edit. No secrets here — see ~/.config/transcription247/ (§5, §12).
+
+[general]
+zona_horaria = "Europe/Madrid"
+version_modulo = "1.0.0"
+idiomas_permitidos = ["es", "en"]
+idioma_fallback = "es"
+
+[paths]
+data_dir = "data"                  # relative to project root
+models_dir = "models"
+secrets_dir = "~/.config/transcription247"
+
+[audio]
+ffmpeg = "ffmpeg"
+ffprobe = "ffprobe"
+sample_rate = 16000
+min_duracion_s = 1.0
+max_bytes = 1073741824             # 1 GiB
+extensiones = ["m4a","mp3","wav","aac","ogg","opus","flac","mp4","mov","webm","caf"]
+
+# --- long-audio windowing (§3.4/§3.5) -----------------------------------------
+# Both heavy stages process the recording one window at a time, so peak RSS is flat in the
+# duration instead of growing ~120 MB per audio-minute (bench/RESULTS.md "Long audio").
+# Cuts land on the longest pause found in the last `window_cut_search_s` of each window.
+[pipeline]
+window_max_s = 900                 # 15 min; 0 disables windowing (pre-windowing behaviour, OOMs > ~35 min)
+window_cut_search_s = 90           # tail of the window searched for a low-energy pause
+window_min_s = 60                  # shortest window the planner emits
+asr_partial_resume = true          # asr.partial.json: a killed ASR resumes at the next window
+
+[asr]
+# Replace <SNAPSHOT_HASH> with the snapshot directory name of your downloaded model.
+model_path = "models/faster-whisper-large-v3-turbo/models--mobiuslabsgmbh--faster-whisper-large-v3-turbo/snapshots/<SNAPSHOT_HASH>"
+compute_type = "int8"              # bench, confirmed
+cpu_threads = 4                    # bench, confirmed
+beam_size = 5                      # bench, confirmed
+vad_min_silence_ms = 500           # bench
+vad_speech_pad_ms = 200            # bench
+language = ""                      # "" = auto-detect restricted to idiomas_permitidos
+
+[diarization]
+backend = "sherpa_onnx"
+segmentation_model = "models/sherpa-onnx-diarization/sherpa-onnx-pyannote-segmentation-3-0/model.onnx"
+embedding_model = "models/sherpa-onnx-diarization/embedding/wespeaker_en_resnet34.onnx"
+num_threads = 4                    # bench, confirmed
+num_clusters = -1                  # -1 = auto (see auto_count); set from jobs.speakers_user when given
+min_duration_on = 0.30             # bench
+min_duration_off = 0.50            # bench
+
+# --- unknown speaker count (num_clusters = -1) --------------------------------
+# "overcluster" = over-split with `overcluster_threshold`, re-embed each over-cluster with
+# `count_embedding_model`, then merge the pooled centroids (bench/RESULTS.md "Auto speaker count").
+# "threshold" = the old single-threshold behaviour, kept only as an escape hatch.
+auto_count = "overcluster"
+count_embedding_model = "models/sherpa-onnx-diarization/embedding/eres2net_base_zh.onnx"
+overcluster_threshold = 0.15       # bench: sherpa's own clustering, deliberately over-split
+merge_threshold = 0.475            # bench: plateau 0.425-0.525 (7/8 clips exact)
+min_cluster_share = 0.03           # clusters under 3% of the speech are absorbed by their nearest
+max_speakers = 8                   # hard cap on the auto-detected count
+cluster_threshold = 0.90           # auto_count = "threshold" only; unreliable, see RESULTS.md
+
+[merge]
+max_gap_s = 2.0                    # no-overlap word: nearest segment within this gap
+min_run_s = 0.60                   # smoothing: shorter runs may be absorbed
+min_run_words = 2
+smooth_passes = 3
+turn_gap_s = 1.20                  # silence that forces a new turn
+max_turn_s = 90.0                  # split long turns at the next sentence boundary
+
+[summary]
+claude_bin = "/home/USER/.local/bin/claude"
+modelo = "sonnet"
+timeout_s = 300
+chunk_seconds = 1500               # ~25 min
+max_reintentos = 1
+confianza_minima_cliente = 0.70
+
+[archivo]
+raiz = "/home/USER/GoogleDrive/Transcripciones_24_7"
+carpeta_fallback = "_Sin_clasificar"
+renombrar_speakers = false         # config hook only; renaming is out of scope
+responsables_owner = ["Owner", "(tú)"]   # §10: headings under "Tareas y acuerdos" whose responsable
+                                         # matches any of these feed "Tareas abiertas del owner" in
+                                         # each <Cliente>/INDICE.md
+
+[archivo.clientes.organizacion_ejemplo]
+carpeta = "Organizacion_Ejemplo"
+nombre = "Organización Ejemplo"
+marcadores = ["ejemplo","producto","roadmap"]
+
+[archivo.clientes.sin_clasificar]
+carpeta = "_Sin_clasificar"
+nombre = "Sin clasificar"
+marcadores = []
+
+[archivo.categorias]
+otras = "Otras"
+claustro = "Claustro"
+departamento = "Departamento"
+convivencia = "Convivencia"
+formacion = "Formación"
+tutoria = "Tutoría"
+coordinacion_docencia = "Coordinación / docencia compartida"
+
+[inbox]
+ruta = "/home/USER/GoogleDrive/Transcripciones_24_7/_INBOX_AUDIO"
+habilitado = true
+poll_segundos = 15
+estabilidad_segundos = 30          # size unchanged across 2 polls >= this apart
+after_success = "delete"           # "delete" | "archive"
+carpeta_procesados = "_procesados"
+carpeta_error = "_error"
+
+[api]
+habilitado = true
+host = "<TAILSCALE_IP>"           # tailnet IP ONLY — never 0.0.0.0
+puerto = 8247
+max_upload_bytes = 1073741824
+titulo_web = "Transcripciones 24/7"
+
+[worker]
+mem_disponible_minima_mb = 3072
+mem_espera_segundos = 60
+mem_max_esperas = 60
+lease_minutes = 120
+max_attempts = 3
+retry_backoff_s = [60, 300, 1800]
+borrar_audio_tras_entrega = true
+conservar_artefactos_dias = 14
+idle_poll_segundos = 5
+
+[logging]
+nivel = "INFO"
+fichero = "data/logs/t247.log"
+max_bytes = 5242880
+backups = 3

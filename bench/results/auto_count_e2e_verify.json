@@ -1,0 +1,85 @@
+{
+ "peak_rss_mb": 1121,
+ "rows": [
+  {
+   "mode": "auto-new",
+   "clip": "en_monologo_1spk_4min",
+   "true_k": 1,
+   "pred_k": 1,
+   "segments": 8,
+   "wall_s": 30.7,
+   "rtf": 0.1279,
+   "peak_rss_mb_so_far": 698
+  },
+  {
+   "mode": "auto-new",
+   "clip": "es_conferencia_1spk_5min",
+   "true_k": 1,
+   "pred_k": 1,
+   "segments": 24,
+   "wall_s": 31.79,
+   "rtf": 0.106,
+   "peak_rss_mb_so_far": 698
+  },
+  {
+   "mode": "auto-new",
+   "clip": "en_interview_2min",
+   "true_k": 2,
+   "pred_k": 2,
+   "segments": 28,
+   "wall_s": 12.36,
+   "rtf": 0.103,
+   "peak_rss_mb_so_far": 698
+  },
+  {
+   "mode": "auto-new",
+   "clip": "es_entrevista_5min",
+   "true_k": 2,
+   "pred_k": 2,
+   "segments": 61,
+   "wall_s": 27.76,
+   "rtf": 0.0925,
+   "peak_rss_mb_so_far": 698
+  },
+  {
+   "mode": "auto-new",
+   "clip": "es_entrevista2_5min",
+   "true_k": 2,
+   "pred_k": 2,
+   "segments": 12,
+   "wall_s": 34.68,
+   "rtf": 0.116,
+   "peak_rss_mb_so_far": 698
+  },
+  {
+   "mode": "auto-new",
+   "clip": "es_mesaredonda_5min",
+   "true_k": 2,
+   "pred_k": 2,
+   "segments": 23,
+   "wall_s": 34.65,
+   "rtf": 0.1155,
+   "peak_rss_mb_so_far": 785
+  },
+  {
+   "mode": "auto-new",
+   "clip": "en_panel4_5min",
+   "true_k": 4,
+   "pred_k": 4,
+   "segments": 17,
+   "wall_s": 35.47,
+   "rtf": 0.1183,
+   "peak_rss_mb_so_far": 796
+  },
+  {
+   "mode": "auto-new",
+   "clip": "es_coloquio_6min",
+   "true_k": 5,
+   "pred_k": 2,
+   "segments": 9,
+   "wall_s": 40.62,
+   "rtf": 0.1129,
+   "peak_rss_mb_so_far": 1121
+  }
+ ]
+}

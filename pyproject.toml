@@ -1,0 +1,28 @@
+[project]
+name = "transcription247"
+version = "0.1.0"
+description = "Self-hosted 24/7 meeting transcription pipeline: ASR + diarization + LLM summaries"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.141.1",
+    "faster-whisper>=1.2.1",
+    "numpy>=2.5.3",
+    "python-multipart>=0.0.32",
+    "sherpa-onnx>=1.13.8",
+    "sherpa-onnx-core==1.13.8",
+    "soundfile>=0.14.0",
+    "uvicorn>=0.53.0",
+]
+
+[project.scripts]
+t247 = "transcription247:main"
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

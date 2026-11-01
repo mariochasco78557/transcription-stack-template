@@ -1,0 +1,43 @@
+[Unit]
+Description=Transcription 24/7 upload API (tailnet only)
+# Spec: <project>/docs/ARCHITECTURE.md §11. Note the two different escaping rules below:
+# WorkingDirectory= takes the rest of the line; if your project path contains spaces, write them literally there (quoting or \x20 does not work),
+# whereas ExecStart= is parsed as an argv and needs \x20 for each space. EDIT the two paths below to match where you cloned the repo.
+
+After=network-online.target
+# tailscaled is a SYSTEM unit, so a user unit cannot order itself after it: there is no
+# After=/Wants= that would work here. Instead the API fails fast when its tailnet address is not
+# yet on an interface (api.py `_check_bind_host`) and systemd simply restarts it until it is —
+# StartLimitIntervalSec=0 keeps that retry loop alive however long Tailscale takes to come up.
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+WorkingDirectory=%h/transcription-stack-template
+ExecStart=%h/transcription-stack-template/.venv/bin/t247 serve
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONUNBUFFERED=1
+Environment=TZ=Europe/Madrid
+
+Restart=on-failure
+RestartSec=5
+RestartSteps=4
+RestartMaxDelaySec=60
+
+Nice=19
+CPUSchedulingPolicy=idle
+IOSchedulingClass=idle
+OOMScoreAdjust=500
+# Uploads are streamed to disk in 1 MiB chunks (§6), so 300 MB is generous; a non-streaming
+# implementation would trip this immediately, which is the point (§12).
+MemoryHigh=250M
+MemoryMax=300M
+MemorySwapMax=0
+
+TimeoutStopSec=20
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=t247-api
+
+[Install]
+WantedBy=default.target
